@@ -1,0 +1,49 @@
+ARCH=arm
+
+INCLUDES+=-I/home/lewy/xbmc-android/xbmc/cores/dvdplayer
+INCLUDES+=-I..
+
+SRCS += StageFrightInterface.cpp
+SRCS += StageFrightVideo.cpp
+SRCS += StageFrightVideoPrivate.cpp
+INCLUDES += -I${prefix}/opt/android-source/frameworks/base/include
+INCLUDES += -I${prefix}/opt/android-source/frameworks/base/native/include
+INCLUDES += -I${prefix}/opt/android-source/frameworks/base/include/media/stagefright
+INCLUDES += -I${prefix}/opt/android-source/frameworks/base/include/media/stagefright/openmax
+INCLUDES += -I${prefix}/opt/android-source/system/core/include
+INCLUDES += -I${prefix}/opt/android-source/libhardware/include
+
+LIBNAME=libXBMCvcodec_stagefrightICS
+LIB_SHARED=/home/lewy/xbmc-android/system/players/dvdplayer/$(LIBNAME)-$(ARCH).so
+
+LIBS += -landroid -lEGL -lGLESv2 -L${prefix}/opt/android-libs -lstdc++ -lutils -lcutils -lstagefright -lbinder -lui -lgui -L/home/lewy/xbmc-android -lxbmc
+
+all: $(LIB_SHARED)
+
+include /home/lewy/xbmc-android/Makefile.include
+-include $(patsubst %.cpp,%.P,$(patsubst %.c,%.P,$(SRCS)))
+
+JNICXXFLAGS = $(CXXFLAGS) -std=gnu++0x -Wextra
+STFCXXFLAGS = $(CXXFLAGS) -Wno-multichar -fno-rtti -fPIC
+
+$(LIB_SHARED): $(OBJS)
+	$(CXX) $(STFCXXFLAGS) $(LDFLAGS) -shared -Wl,-no-undefined -g -o $(LIB_SHARED) $(OBJS) $(LIBS)
+
+StageFrightVideo.o: StageFrightVideo.cpp
+	$(CXX) -MF $*.d -MD -c $(STFCXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+StageFrightVideoPrivate.o: StageFrightVideoPrivate.cpp
+	$(CXX) -MF $*.d -MD -c $(STFCXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+Surface.o: Surface.cpp
+	$(CXX) -MF $*.d -MD -c $(JNICXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+SurfaceTexture.o: SurfaceTexture.cpp
+	$(CXX) -MF $*.d -MD -c $(JNICXXFLAGS) $(DEFINES) $(INCLUDES) $< -o $@
+
+CLEAN_FILES = \
+	$(LIB_SHARED) \
+
+DISTCLEAN_FILES= \
+	Makefile \
+
